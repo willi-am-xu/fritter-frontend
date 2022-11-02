@@ -2,6 +2,7 @@ import type {HydratedDocument, Types} from 'mongoose';
 import type {Freet} from './model';
 import FreetModel from './model';
 import UserCollection from '../user/collection';
+import mongoose from 'mongoose';
 
 /**
  * This files contains a class that has the functionality to explore freets
@@ -73,6 +74,90 @@ class FreetCollection {
     const freet = await FreetModel.findOne({_id: freetId});
     freet.content = content;
     freet.dateModified = new Date();
+    await freet.save();
+    return freet.populate('authorId');
+  }
+
+  /**
+   * Add a like to a freet
+   *
+   * @param {string} freetId - The id of the freet to be liked
+   * @param {string} userId - The user who liked the freet
+   * @return {Promise<HydratedDocument<Freet>>} - The newly liked freet
+   */
+   static async addOneLike(freetId: Types.ObjectId | string, userId: Types.ObjectId | string): Promise<HydratedDocument<Freet>> {
+    const freet = await FreetModel.findOne({_id: freetId});
+    freet.likes.push(new mongoose.Types.ObjectId( userId));
+    await freet.save();
+    return freet.populate('authorId');
+  }
+
+  /**
+   * Add a refreet to a freet
+   *
+   * @param {string} freetId - The id of the freet to be refreeted
+   * @param {string} userId - The user who refreeted the freet
+   * @return {Promise<HydratedDocument<Freet>>} - The newly refreeted freet
+   */
+   static async addOneReFreet(freetId: Types.ObjectId | string, userId: Types.ObjectId | string): Promise<HydratedDocument<Freet>> {
+    const freet = await FreetModel.findOne({_id: freetId});
+    freet.reFreets.push(new mongoose.Types.ObjectId( userId));
+    await freet.save();
+    return freet.populate('authorId');
+  }
+
+  /**
+   * Add a personal downvote to a freet
+   *
+   * @param {string} freetId - The id of the freet to be downvoted
+   * @param {string} userId - The user who downvoted the freet
+   * @return {Promise<HydratedDocument<Freet>>} - The newly downvoted freet
+   */
+   static async addOneDownvote(freetId: Types.ObjectId | string, userId: Types.ObjectId | string): Promise<HydratedDocument<Freet>> {
+    const freet = await FreetModel.findOne({_id: freetId});
+    freet.personalDownvotes.push(new mongoose.Types.ObjectId( userId));
+    await freet.save();
+    return freet.populate('authorId');
+  }
+
+  /**
+   * Remove a like from a freet
+   *
+   * @param {string} freetId - The id of the freet to be unliked
+   * @param {string} userId - The user who unliked the freet
+   * @return {Promise<HydratedDocument<Freet>>} - The newly unliked freet
+   */
+   static async removeOneLike(freetId: Types.ObjectId | string, userId: Types.ObjectId | string): Promise<HydratedDocument<Freet>> {
+    const freet = await FreetModel.findOne({_id: freetId});
+    freet.likes = freet.likes.filter((id) => id.toString()!==userId);
+    await freet.save();
+    return freet.populate('authorId');
+  }
+
+  /**
+   * Remove a refreet from a freet
+   *
+   * @param {string} freetId - The id of the freet to be unrefreeted
+   * @param {string} userId - The user who unrefreeted the freet
+   * @return {Promise<HydratedDocument<Freet>>} - The newly unrefreeted freet
+   */
+   static async removeOneReFreet(freetId: Types.ObjectId | string, userId: Types.ObjectId | string): Promise<HydratedDocument<Freet>> {
+    const freet = await FreetModel.findOne({_id: freetId});
+    freet.reFreets = freet.reFreets.filter((id) => id.toString()!==userId);
+    await freet.save();
+    return freet.populate('authorId');
+  }
+
+  /**
+   * Add a personal downvote to a freet
+   *
+   * @param {string} freetId - The id of the freet to be undownvoted
+   * @param {string} userId - The user who undownvoted the freet
+   * @return {Promise<HydratedDocument<Freet>>} - The newly undownvoted freet
+   */
+   static async removeOneDownvote(freetId: Types.ObjectId | string, userId: Types.ObjectId | string): Promise<HydratedDocument<Freet>> {
+    const freet = await FreetModel.findOne({_id: freetId});
+    freet.personalDownvotes = freet.personalDownvotes.filter((id) => id.toString()!==userId);
     await freet.save();
     return freet.populate('authorId');
   }

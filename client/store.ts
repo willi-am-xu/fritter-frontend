@@ -12,6 +12,7 @@ const store = new Vuex.Store({
     filter: null, // Username to filter shown freets by (null = show all)
     freets: [], // All freets created in the app
     username: null, // Username of the logged in user
+    name: null, // name of the logged in user
     alerts: {} // global success/error messages encountered during submissions to non-visible forms
   },
   mutations: {
@@ -30,6 +31,13 @@ const store = new Vuex.Store({
        * @param username - new username to set
        */
       state.username = username;
+    },
+    setName(state, name) {
+      /**
+       * Update the stored name to the specified one.
+       * @param name - new name to set
+       */
+       state.name = name;
     },
     updateFilter(state, filter) {
       /**
@@ -51,6 +59,7 @@ const store = new Vuex.Store({
        */
       const url = state.filter ? `/api/users/${state.filter}/freets` : '/api/freets';
       const res = await fetch(url).then(async r => r.json());
+      console.log(res);
       state.freets = res;
     }
   },

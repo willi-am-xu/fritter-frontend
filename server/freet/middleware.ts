@@ -57,8 +57,92 @@ const isValidFreetModifier = async (req: Request, res: Response, next: NextFunct
   next();
 };
 
+const isUnlikedFreet = async (req: Request, res: Response, next: NextFunction) => {
+  const freet = await FreetCollection.findOne(req.params.freetId);
+  const userId = req.session.userId;
+  if (freet.likes.map((id) => id.toString()).includes(userId)) {
+    res.status(403).json({
+      error: 'Cannot double like freets.'
+    });
+    return;
+  }
+
+  next();
+};
+
+const isLikedFreet = async (req: Request, res: Response, next: NextFunction) => {
+  const freet = await FreetCollection.findOne(req.params.freetId);
+  const userId = req.session.userId;
+  if (!freet.likes.map((id) => id.toString()).includes(userId)) {
+    res.status(403).json({
+      error: 'Cannot unlike freets without liking first.'
+    });
+    return;
+  }
+
+  next();
+};
+
+const isUnreFreetedFreet = async (req: Request, res: Response, next: NextFunction) => {
+  const freet = await FreetCollection.findOne(req.params.freetId);
+  const userId = req.session.userId;
+  if (freet.reFreets.map((id) => id.toString()).includes(userId)) {
+    res.status(403).json({
+      error: 'Cannot double refreet freets.'
+    });
+    return;
+  }
+
+  next();
+};
+
+const isReFreetedFreet = async (req: Request, res: Response, next: NextFunction) => {
+  const freet = await FreetCollection.findOne(req.params.freetId);
+  const userId = req.session.userId;
+  if (!freet.reFreets.map((id) => id.toString()).includes(userId)) {
+    res.status(403).json({
+      error: 'Cannot unrefreet freets without refreeting first.'
+    });
+    return;
+  }
+
+  next();
+};
+
+const isUndownvotedFreet = async (req: Request, res: Response, next: NextFunction) => {
+  const freet = await FreetCollection.findOne(req.params.freetId);
+  const userId = req.session.userId;
+  if (freet.personalDownvotes.map((id) => id.toString()).includes(userId)) {
+    res.status(403).json({
+      error: 'Cannot double downvote freets.'
+    });
+    return;
+  }
+
+  next();
+};
+
+const isDownvotedFreet = async (req: Request, res: Response, next: NextFunction) => {
+  const freet = await FreetCollection.findOne(req.params.freetId);
+  const userId = req.session.userId;
+  if (!freet.personalDownvotes.map((id) => id.toString()).includes(userId)) {
+    res.status(403).json({
+      error: 'Cannot undownvote freets without downvoting first.'
+    });
+    return;
+  }
+
+  next();
+};
+
 export {
   isValidFreetContent,
   isFreetExists,
-  isValidFreetModifier
+  isValidFreetModifier,
+  isLikedFreet,
+  isUnlikedFreet,
+  isDownvotedFreet,
+  isUndownvotedFreet,
+  isReFreetedFreet,
+  isUnreFreetedFreet
 };

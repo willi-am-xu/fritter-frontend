@@ -1,4 +1,5 @@
 import type {Request, Response, NextFunction} from 'express';
+import {Types} from 'mongoose';
 import UserCollection from '../user/collection';
 
 /**
@@ -45,6 +46,17 @@ const isValidPassword = (req: Request, res: Response, next: NextFunction) => {
   if (!passwordRegex.test(req.body.password)) {
     res.status(400).json({
       error: 'Password must be a nonempty string.'
+    });
+    return;
+  }
+
+  next();
+};
+
+const isValidName = (req: Request, res: Response, next: NextFunction) => {
+  if (req.body.name.length === 0) {
+    res.status(400).json({
+      error: 'Name must be a nonempty string.'
     });
     return;
   }
@@ -144,6 +156,95 @@ const isAuthorExists = async (req: Request, res: Response, next: NextFunction) =
   next();
 };
 
+const isUserExists = async (req: Request, res: Response, next: NextFunction) => {
+  const username = req.params.username as string;
+
+  if (!username) {
+    res.status(400).json({error: `Username must be nonempty.`});
+    return;
+  }
+
+  const user = await UserCollection.findOneByUsername(
+    username
+  );
+
+  if (user) {
+    next();
+  } else {
+    res.status(401).json({error: 'No user was found with that username.'});
+  }
+};
+
+const isFolloweeExists = async (req: Request, res: Response, next: NextFunction) => {
+  const followee = req.params.followee;
+
+  if (!followee) {
+    res.status(400).json({error: `Missing followee username.`});
+    return;
+  }
+
+  const user = await UserCollection.findOneByUsername(
+    followee
+  );
+
+  if (user) {
+    next();
+  } else {
+    res.status(401).json({error: 'Invalid followee username provided.'});
+  }
+};
+
+
+const isAlreadyFollowing = async (req: Request, res: Response, next: NextFunction) => {
+  const followeeUser = await UserCollection.findOneByUsername(req.params.followee);
+  const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+  const user = await UserCollection.findOneByUserId(userId);
+
+  if (followeeUser.followers.includes(user.username)) {
+    res.status(409).json({
+      error: {
+        username: 'This user is already followed.'
+      }
+    });
+  }
+  else if (req.params.followee === user.username) {
+    res.status(409).json({
+      error: {
+        username: 'Cannot self-follow!'
+      }
+    });
+  }
+  else {
+    next();
+    return;
+  }
+};
+
+const isNotAlreadyFollowing = async (req: Request, res: Response, next: NextFunction) => {
+  const followeeUser = await UserCollection.findOneByUsername(req.params.followee);
+  const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+  const user = await UserCollection.findOneByUserId(userId);
+
+  if (!followeeUser.followers.includes(user.username)) {
+    res.status(409).json({
+      error: {
+        username: 'This user has not been followed.'
+      }
+    });
+  }
+  else if (req.params.followee === user.username) {
+    res.status(409).json({
+      error: {
+        username: 'Cannot self-unfollow!'
+      }
+    });
+  }
+  else {
+    next();
+    return;
+  }
+};
+
 export {
   isCurrentSessionUserExists,
   isUserLoggedIn,
@@ -152,5 +253,10 @@ export {
   isAccountExists,
   isAuthorExists,
   isValidUsername,
-  isValidPassword
+  isValidPassword,
+  isValidName,
+  isUserExists,
+  isFolloweeExists,
+  isAlreadyFollowing,
+  isNotAlreadyFollowing
 };

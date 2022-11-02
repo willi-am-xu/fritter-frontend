@@ -91,6 +91,7 @@ router.delete(
  *
  * @param {string} username - username of user
  * @param {string} password - user's password
+ * @param {string} name - name of user
  * @return {UserResponse} - The created user
  * @throws {403} - If there is a user already logged in
  * @throws {409} - If username is already taken
@@ -103,10 +104,11 @@ router.post(
     userValidator.isUserLoggedOut,
     userValidator.isValidUsername,
     userValidator.isUsernameNotAlreadyInUse,
-    userValidator.isValidPassword
+    userValidator.isValidPassword,
+    userValidator.isValidName
   ],
   async (req: Request, res: Response) => {
-    const user = await UserCollection.addOne(req.body.username, req.body.password);
+    const user = await UserCollection.addOne(req.body.username, req.body.password, req.body.name);
     req.session.userId = user._id.toString();
     res.status(201).json({
       message: `Your account was created successfully. You have been logged in as ${user.username}`,
@@ -168,5 +170,113 @@ router.delete(
     });
   }
 );
+
+/**
+ * Follow another user.
+ *
+ * @name POST /api/users/follow/:followee?
+ *
+ * @param {string} followee - The followee's username
+ * @return {UserResponse} - The newly modified user
+ * @throws {403} - If user is not logged in
+ * @throws {409} - If user is already following
+ * @throws {404} - If followee does not exist
+ *
+ */
+ router.post(
+  '/follow/:followee?',
+  [
+    userValidator.isUserLoggedIn,
+    userValidator.isFolloweeExists,
+    userValidator.isAlreadyFollowing
+  ],
+  async (req: Request, res: Response) => {
+    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const user = await UserCollection.followOne(userId, req.params.followee);
+    res.status(200).json({
+      message: `Followed ${req.params.followee} successfully.`,
+      user: util.constructUserResponse(user)
+    });
+  }
+);
+
+/**
+ * Follow another user.
+ *
+ * @name DELETE /api/users/follow/:followee?
+ *
+ * @param {string} followee - The followee's username
+ * @return {UserResponse} - The newly modified user
+ * @throws {403} - If user is not logged in
+ * @throws {409} - If user is already following
+ * @throws {404} - If followee does not exist
+ *
+ */
+ router.delete(
+  '/follow/:followee?',
+  [
+    userValidator.isUserLoggedIn,
+    userValidator.isFolloweeExists,
+    userValidator.isNotAlreadyFollowing
+  ],
+  async (req: Request, res: Response) => {
+    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const user = await UserCollection.unfollowOne(userId, req.params.followee);
+    res.status(200).json({
+      message: `Unfollowed ${req.params.followee} successfully.`,
+      user: util.constructUserResponse(user)
+    });
+  }
+);
+
+/**
+ * Get a user's public profile page details.
+ *
+ * @name GET /api/users/:username?/profile
+ *
+ * @param {string} username - The username of the user's public profile
+ * @return {UserResponse} - An object with user's details
+ * @throws {403} - If user is not logged in
+ * @throws {400} - If username is not valid
+ */
+ router.get(
+  '/:username?/profile',
+  [
+    userValidator.isUserLoggedIn,
+    userValidator.isUserExists
+  ],
+  async (req: Request, res: Response) => {
+    const username = (req.params.username as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const user = await UserCollection.findOneByUsername(username);
+    res.status(200).json({
+      message: `${username} profile info obtained.`,
+      user: util.constructUserResponse(user)
+    });
+  }
+);
+
+/**
+ * Update a user's public profile page.
+ *
+ * @name PATCH /api/users/my/profile
+ *  
+ * @return {UserResponse} - The updated user
+ * @throws {403} - If user is not logged in
+ */
+ router.patch(
+  '/my/profile',
+  [
+    userValidator.isUserLoggedIn
+  ],
+  async (req: Request, res: Response) => {
+    const userId = (req.session.userId as string) ?? ''; // Will not be an empty string since its validated in isUserLoggedIn
+    const user = await UserCollection.updateOne(userId, req.body);
+    res.status(200).json({
+      message: 'Your profile was updated successfully.',
+      user: util.constructUserResponse(user)
+    });
+  }
+);
+
 
 export {router as userRouter};

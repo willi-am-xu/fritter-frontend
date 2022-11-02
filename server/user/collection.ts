@@ -18,10 +18,10 @@ class UserCollection {
    * @param {string} password - The password of the user
    * @return {Promise<HydratedDocument<User>>} - The newly created user
    */
-  static async addOne(username: string, password: string): Promise<HydratedDocument<User>> {
+  static async addOne(username: string, password: string, name: string): Promise<HydratedDocument<User>> {
     const dateJoined = new Date();
 
-    const user = new UserModel({username, password, dateJoined});
+    const user = new UserModel({username, password, dateJoined, followers:[], following:[], name: name});
     await user.save(); // Saves user to MongoDB
     return user;
   }
@@ -67,7 +67,7 @@ class UserCollection {
    * @param {Object} userDetails - An object with the user's updated credentials
    * @return {Promise<HydratedDocument<User>>} - The updated user
    */
-  static async updateOne(userId: Types.ObjectId | string, userDetails: {password?: string; username?: string}): Promise<HydratedDocument<User>> {
+  static async updateOne(userId: Types.ObjectId | string, userDetails: {password?: string, username?: string, name?: string, bio?: string, picture?: string}): Promise<HydratedDocument<User>> {
     const user = await UserModel.findOne({_id: userId});
     if (userDetails.password) {
       user.password = userDetails.password;
@@ -77,6 +77,37 @@ class UserCollection {
       user.username = userDetails.username;
     }
 
+    if (userDetails.name) {
+      user.name = userDetails.name;
+    }
+
+    if (userDetails.bio) {
+      user.bio = userDetails.bio;
+    }
+
+    if (userDetails.picture) {
+      user.picture = userDetails.picture;
+    }
+    await user.save();
+    return user;
+  }
+
+  static async followOne(userId: Types.ObjectId | string, followeeUsername: string): Promise<HydratedDocument<User>> {
+    const user = await UserModel.findOne({_id: userId});
+    const followee = await UserModel.findOne({username: followeeUsername});
+    followee.followers.push(user.username);
+    user.following.push(followee.username);
+    await followee.save();
+    await user.save();
+    return user;
+  }
+
+  static async unfollowOne(userId: Types.ObjectId | string, followeeUsername: string): Promise<HydratedDocument<User>> {
+    const user = await UserModel.findOne({_id: userId});
+    const followee = await UserModel.findOne({username: followeeUsername});
+    followee.followers = followee.followers.filter((value) => {value !== user.username});
+    user.following = user.following.filter((value) => {value !== followee.username});
+    await followee.save();
     await user.save();
     return user;
   }
