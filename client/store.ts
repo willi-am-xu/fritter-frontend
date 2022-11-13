@@ -14,6 +14,8 @@ const store = new Vuex.Store({
     username: null, // Username of the logged in user
     name: null, // name of the logged in user
     following: [],
+    startDate: null,
+    endDate: null,
     alerts: {} // global success/error messages encountered during submissions to non-visible forms
   },
   mutations: {
@@ -50,6 +52,12 @@ const store = new Vuex.Store({
        */
       state.filter = filter;
     },
+    updateStartDateFilter(state, filter) {
+      state.startDate = filter;
+    },
+    updateEndDateFilter(state, filter) {
+      state.endDate = filter;
+    },
     updateFreets(state, freets) {
       /**
        * Update the stored freets to the provided freets.
@@ -61,7 +69,16 @@ const store = new Vuex.Store({
       /**
        * Request the server for the currently available freets.
        */
-      const url = state.filter ? `/api/users/${state.filter}/freets` : '/api/freets';
+      let url = '/api/freets';
+      if (state.filter) {
+        url = url.concat(`?authorId=${state.filter}`);
+      }
+      if (state.startDate) {
+        url = url.concat(`?startdate=${state.startDate}`);
+      }
+      if (state.endDate) {
+        url = url.concat(`?enddate=${state.endDate}`);
+      }
       const res = await fetch(url).then(async r => r.json());
       console.log(res);
       state.freets = res;

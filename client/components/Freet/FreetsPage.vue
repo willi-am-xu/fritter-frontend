@@ -38,6 +38,18 @@
             placeholder="🔍 Filter by author (optional)"
             button="🔄 Get freets"
           />
+          <GetFreetsFormStartDate
+            ref="getFreetsFormStartDate"
+            value="startDate"
+            placeholder="🔍 Filter by start date (optional)"
+            button="🔄 Get freets"
+          />
+          <GetFreetsFormEndDate
+            ref="getFreetsFormEndDate"
+            value="endDate"
+            placeholder="🔍 Filter by end date (optional)"
+            button="🔄 Get freets"
+          />
         </div>
       </header>
       <section
@@ -62,10 +74,12 @@
 import FreetComponent from '@/components/Freet/FreetComponent.vue';
 import CreateFreetForm from '@/components/Freet/CreateFreetForm.vue';
 import GetFreetsForm from '@/components/Freet/GetFreetsForm.vue';
+import GetFreetsFormStartDate from '@/components/Freet/GetFreetsFormStartDate.vue';
+import GetFreetsFormEndDate from '@/components/Freet/GetFreetsFormEndDate.vue';
 
 export default {
   name: 'FreetPage',
-  components: {FreetComponent, GetFreetsForm, CreateFreetForm},
+  components: {FreetComponent, GetFreetsForm, CreateFreetForm, GetFreetsFormStartDate,GetFreetsFormEndDate},
   mounted() {
     this.$refs.getFreetsForm.submit();
   }

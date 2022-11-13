@@ -93,6 +93,7 @@ export default {
        */
       this.editing = true; // Keeps track of if a freet is being edited
       this.draft = this.freet.content; // The content of our current "draft" while being edited
+      console.log(this.freet);
     },
     stopEditing() {
       /**
