@@ -6,6 +6,7 @@ import ProfilePage from './components/Account/ProfilePage.vue';
 import LoginPage from './components/Login/LoginPage.vue';
 import NotFound from './NotFound.vue';
 import Feed from './components/Freet/Feed.vue';
+import BundlesPage from './components/Bookmark/BundlesPage.vue';
 
 Vue.use(VueRouter);
 
@@ -15,7 +16,8 @@ const routes = [
   {path: '/login', name: 'Login', component: LoginPage},
   {path: '/users/:username?/profile', name: 'Profile', component: ProfilePage},
   {path: '*', name: 'Not Found', component: NotFound},
-  {path: '/feed', name: 'Feed', component: Feed}
+  {path: '/feed', name: 'Feed', component: Feed},
+  {path: '/users/:username?/bundles', name: 'Bundles', component: BundlesPage}
 ];
 
 const router = new VueRouter({routes});

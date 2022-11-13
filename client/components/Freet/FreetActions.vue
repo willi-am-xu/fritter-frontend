@@ -43,11 +43,12 @@
           ⏫ Undo Personal Downvote
         </button>
 
-        <button
+        <!-- <button
           @click="submitBookmark"
         >
           🔖 Bookmark
-        </button>
+        </button> -->
+        <BundleDropdown :freet="freet"/>
       </div>
     <section class="alerts">
       <article
@@ -62,14 +63,17 @@
 </template>
 
 <script>
+import BundleDropdown from '@/components/Bookmark/BundleDropdown.vue';
 export default {
     name: "FreetActions",
     props: {
-    // Data from the stored freet
     freet: {
       type: Object,
       required: true
     }
+    },
+    components: {
+        BundleDropdown
     },
     data() {
         return {

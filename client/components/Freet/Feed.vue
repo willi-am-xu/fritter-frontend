@@ -84,6 +84,7 @@ export default {
             this.probs = {};
             for (let i = 0; i <  res.length; i++) {
                 if (res[i].personalDownvotes.includes(this.id)) {
+                    console.log(res[i]);
                     if (this.probs[res[i].author]) {
                         this.probs[res[i].author] += 0.2;
                     }
