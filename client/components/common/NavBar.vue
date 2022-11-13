@@ -21,6 +21,18 @@
         Account
       </router-link>
       <router-link
+        v-if="$store.state.username"
+        to="/feed"
+      >
+        Feed
+      </router-link>
+      <router-link
+        v-if="$store.state.username"
+        :to="{path: `/users/${$store.state.username}/profile`}"
+      >
+        My Profile
+      </router-link>
+      <router-link
         v-else
         to="/login"
       >

@@ -21,6 +21,7 @@ export default {
       const user = res.user;
       this.$store.commit('setUsername', user ? user.username : null);
       this.$store.commit('setName', user ? user.name : null);
+      this.$store.commit('setFollowing', user ? user.following : null);
     });
 
     // Clear alerts on page refresh

@@ -6,7 +6,7 @@
     class="freet"
   >
     <header>
-      <h3 class="author">
+      <h3 class="author" @click="goToProfile">
         @{{ freet.author }}
       </h3>
       <div
@@ -52,6 +52,7 @@
       Posted at {{ freet.dateModified }}
       <i v-if="freet.edited">(edited)</i>
     </p>
+    <FreetActions v-if="$store.state.username" :freet="freet"/>
     <section class="alerts">
       <article
         v-for="(status, alert, index) in alerts"
@@ -65,6 +66,7 @@
 </template>
 
 <script>
+import FreetActions from '@/components/Freet/FreetActions.vue';
 export default {
   name: 'FreetComponent',
   props: {
@@ -73,6 +75,9 @@ export default {
       type: Object,
       required: true
     }
+  },
+  components: {
+    FreetActions
   },
   data() {
     return {
@@ -161,6 +166,9 @@ export default {
         this.$set(this.alerts, e, 'error');
         setTimeout(() => this.$delete(this.alerts, e), 3000);
       }
+    },
+    goToProfile() {
+      this.$router.push(`/users/${this.freet.author}/profile`);
     }
   }
 };
